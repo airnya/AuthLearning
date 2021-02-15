@@ -15,7 +15,7 @@ namespace AuthLearning.Resource.Controllers
     public class OrdersController : ControllerBase
     {
         public readonly BookStore store;
-        private Guid userId => Guid.Parse(User.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier).Value);
+        private Guid UserId => Guid.Parse(User.Claims.Single(c => c.Type == ClaimTypes.NameIdentifier).Value);
         public OrdersController(BookStore store)
         {
             this.store = store;
@@ -26,10 +26,10 @@ namespace AuthLearning.Resource.Controllers
         [Route("")]
         public ActionResult GetOrders()
         {
-            if (!store.Orders.ContainsKey(userId))
+            if (!store.Orders.ContainsKey(UserId))
                 return Ok(Enumerable.Empty<Book>());
 
-            var orderedBookIds = store.Orders.Single(o => o.Key == userId).Value;
+            var orderedBookIds = store.Orders.Single(o => o.Key == UserId).Value;
             var orderedBooks = store.Books.Where(b => orderedBookIds.Contains(b.Id));
 
             return Ok(orderedBooks);

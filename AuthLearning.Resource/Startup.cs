@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -29,34 +30,44 @@ namespace AuthLearning.Resource
 
             var authOptions = Configuration.GetSection("Auth").Get<AuthOptions>();
 
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer( options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidIssuer = authOptions.Issuer,
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+           {
+               options.RequireHttpsMetadata = false;
+               options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+               {
+                   ValidateIssuer = true,
+                   ValidIssuer = authOptions.Issuer,
 
-                    ValidateAudience = true,
-                    ValidAudience = authOptions.Audience,
+                   ValidateAudience = true,
+                   ValidAudience = authOptions.Audience,
 
-                    ValidateLifetime = true,
+                   ValidateLifetime = true,
 
-                    IssuerSigningKey = authOptions.GetSymmetricSecurityKey(), //HS256
+                   IssuerSigningKey = authOptions.GetSymmetricSecurityKey(), //HS256
                     ValidateIssuerSigningKey = true,
-                };
-            });
+               };
+           });
 
             services.AddCors(options =>
             {
                 options.AddDefaultPolicy(
                     builder =>
-                    { 
+                    {
                         builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
                     });
             });
 
             services.AddSingleton(new BookStore());
+            services.AddSingleton(new UserStore());
+
+            //services.AddDbContext<WordDetailContext>(options =>
+            //options.UseSqlServer( Configuration.GetConnectionString( "DevConnection" ) ));
+
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+
+            services.AddDbContext<FaithDetailContext>(options =>
+               options.UseSqlServer(connection));
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
